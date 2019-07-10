@@ -54,8 +54,6 @@ public class ArchiveEntry
 
     private final Owner owner;
 
-    private final Owner defaultDirOwner;
-
     private PlexusIoResourceAttributes attributes;
 
     private final boolean addSynchronously;
@@ -69,17 +67,15 @@ public class ArchiveEntry
      * @param owner TODO: describe parameter and possibility to use {@code null}
      * @param collection
      * @param defaultDirMode
-     * @param defaultDirOwner TODO: describe parameter and possibility to use {@code null}
      */
     private ArchiveEntry( String name, @Nonnull PlexusIoResource resource, int type, int mode, Owner owner,
-                          PlexusIoResourceCollection collection, int defaultDirMode , Owner defaultDirOwner )
+                          PlexusIoResourceCollection collection, int defaultDirMode )
     {
         try
         {
             this.name = name;
             this.defaultDirMode = defaultDirMode;
             this.owner = owner;
-            this.defaultDirOwner = defaultDirOwner;
             this.resource = collection != null ? collection.resolve( resource ) : resource;
             this.attributes = ( resource instanceof ResourceAttributeSupplier )
                                   ? ( (ResourceAttributeSupplier) resource ).getAttributes() : null;
@@ -207,8 +203,7 @@ public class ArchiveEntry
     }
 
     public static ArchiveEntry createFileEntry( String target, PlexusIoResource resource, int permissions, Owner owner,
-                                                PlexusIoResourceCollection collection, int defaultDirectoryPermissions ,
-                                                Owner defaultDirectoryOwner )
+                                                PlexusIoResourceCollection collection, int defaultDirectoryPermissions )
         throws ArchiverException
     {
         if ( resource.isDirectory() )
@@ -216,12 +211,11 @@ public class ArchiveEntry
             throw new ArchiverException( "Not a file: " + resource.getName() );
         }
         final int type = resource.isSymbolicLink() ? SYMLINK : FILE;
-        return new ArchiveEntry( target, resource, type, permissions, owner, collection, defaultDirectoryPermissions,
-            defaultDirectoryOwner );
+        return new ArchiveEntry( target, resource, type, permissions, owner, collection, defaultDirectoryPermissions );
     }
 
     public static ArchiveEntry createFileEntry( String target, File file, int permissions, Owner owner,
-                                                int defaultDirectoryPermissions, Owner defaultDirectoryOwner )
+                                                int defaultDirectoryPermissions )
         throws ArchiverException, IOException
     {
         if ( !file.isFile() )
@@ -242,13 +236,11 @@ public class ArchiveEntry
             type = FILE; // File flag was there already. This is a bit of a mess !
         }
 
-        return new ArchiveEntry( target, res, type, permissions, owner, null, defaultDirectoryPermissions,
-            defaultDirectoryOwner );
+        return new ArchiveEntry( target, res, type, permissions, owner, null, defaultDirectoryPermissions );
     }
 
     public static ArchiveEntry createDirectoryEntry( String target, @Nonnull PlexusIoResource resource, int permissions,
-                                                     Owner owner,  int defaultDirectoryPermissions,
-                                                     Owner defaultDirectoryOwner )
+                                                     Owner owner, int defaultDirectoryPermissions )
         throws ArchiverException
     {
         if ( !resource.isDirectory() )
@@ -266,12 +258,11 @@ public class ArchiveEntry
             type = DIRECTORY; // Dir flag was there already. This is a bit of a mess !
 
         }
-        return new ArchiveEntry( target, resource, type, permissions, owner, null, defaultDirectoryPermissions,
-            defaultDirectoryOwner );
+        return new ArchiveEntry( target, resource, type, permissions, owner, null, defaultDirectoryPermissions );
     }
 
     public static ArchiveEntry createDirectoryEntry( String target, final File file, int permissions, Owner owner,
-                                                     int defaultDirMode1, Owner defaultDirOwner )
+                                                     int defaultDirMode1 )
         throws ArchiverException, IOException
     {
         if ( !file.isDirectory() )
@@ -280,16 +271,15 @@ public class ArchiveEntry
         }
 
         final PlexusIoResource res = createResource( file );
-        return new ArchiveEntry( target, res, DIRECTORY, permissions, owner, null, defaultDirMode1, defaultDirOwner );
+        return new ArchiveEntry( target, res, DIRECTORY, permissions, owner, null, defaultDirMode1 );
     }
 
     public static ArchiveEntry createSymlinkEntry( String symlinkName, int permissions, Owner owner,
-                                                   String symlinkDestination, int defaultDirectoryPermissions,
-                                                   Owner defaultDirectoryOwner )
+                                                   String symlinkDestination, int defaultDirectoryPermissions )
     {
         final ArchiveEntry archiveEntry = new ArchiveEntry(
             symlinkName, new PlexusIoVirtualSymlinkResource( new File( symlinkName ), symlinkDestination ), SYMLINK,
-            permissions, owner, null, defaultDirectoryPermissions, defaultDirectoryOwner );
+            permissions, owner, null, defaultDirectoryPermissions );
 
         return archiveEntry;
     }
@@ -315,8 +305,4 @@ public class ArchiveEntry
         return defaultDirMode;
     }
 
-    public Owner getDefaultDirOwner()
-    {
-        return defaultDirOwner;
-    }
 }

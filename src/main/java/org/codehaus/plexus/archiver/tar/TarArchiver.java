@@ -29,6 +29,7 @@ import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream;
 import org.codehaus.plexus.archiver.AbstractArchiver;
 import org.codehaus.plexus.archiver.ArchiveEntry;
 import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.Owner;
 import org.codehaus.plexus.archiver.ResourceIterator;
 import org.codehaus.plexus.archiver.exceptions.EmptyArchiveException;
 import org.codehaus.plexus.archiver.util.ResourceUtils;
@@ -298,24 +299,24 @@ public class TarArchiver
             }
             te.setMode( entry.getMode() );
 
-            PlexusIoResourceAttributes attributes = entry.getResourceAttributes();
+            final Owner owner = entry.getOwner();
 
-            te.setUserName( ( attributes != null && attributes.getUserName() != null )
-                                ? attributes.getUserName()
+            te.setUserName( ( owner != null && owner.getUserName() != null )
+                                ? owner.getUserName()
                                 : options.getUserName() );
-            te.setGroupName( ( attributes != null && attributes.getGroupName() != null )
-                                 ? attributes.getGroupName()
+            te.setGroupName( ( owner != null && owner.getGroupName() != null )
+                                 ? owner.getGroupName()
                                  : options.getGroup() );
 
             final int userId =
-                ( attributes != null && attributes.getUserId() != null ) ? attributes.getUserId() : options.getUid();
+                ( owner != null && owner.getUserId() != null ) ? owner.getUserId() : options.getUid();
             if ( userId >= 0 )
             {
                 te.setUserId( userId );
             }
 
             final int groupId =
-                ( attributes != null && attributes.getGroupId() != null ) ? attributes.getGroupId() : options.getGid();
+                ( owner != null && owner.getGroupId() != null ) ? owner.getGroupId() : options.getGid();
             if ( groupId >= 0 )
             {
                 te.setGroupId( groupId );
