@@ -20,12 +20,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 import javax.annotation.Nonnull;
-import org.codehaus.plexus.archiver.ArchiveEntry;
-import org.codehaus.plexus.archiver.ArchivedFileSet;
-import org.codehaus.plexus.archiver.Archiver;
-import org.codehaus.plexus.archiver.ArchiverException;
-import org.codehaus.plexus.archiver.FileSet;
-import org.codehaus.plexus.archiver.ResourceIterator;
+
+import org.codehaus.plexus.archiver.*;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
 import org.codehaus.plexus.components.io.resources.PlexusIoResourceCollection;
 
@@ -103,6 +99,13 @@ public class DelgatingArchiver implements Archiver
     }
 
     @Override
+    public void addSymlink(String symlinkName, int permissions, Owner owner, String symlinkDestination)
+        throws ArchiverException
+    {
+        target.addSymlink( symlinkName, permissions, owner, symlinkDestination );
+    }
+
+    @Override
     public void addFile( @Nonnull File inputFile, @Nonnull String destFileName )
         throws ArchiverException
     {
@@ -114,6 +117,13 @@ public class DelgatingArchiver implements Archiver
         throws ArchiverException
     {
         target.addFile( inputFile, destFileName, permissions );
+    }
+
+    @Override
+    public void addFile( @Nonnull File inputFile, @Nonnull String destFileName, int permissions, Owner owner )
+        throws ArchiverException
+    {
+        target.addFile( inputFile, destFileName, permissions, owner );
     }
 
     @Override
@@ -167,6 +177,13 @@ public class DelgatingArchiver implements Archiver
     }
 
     @Override
+    public void addResource( PlexusIoResource resource, String destFileName, int permissions, Owner owner )
+        throws ArchiverException
+    {
+        target.addResource( resource, destFileName, permissions, owner );
+    }
+
+    @Override
     public void addResources( PlexusIoResourceCollection resources )
         throws ArchiverException
     {
@@ -204,6 +221,24 @@ public class DelgatingArchiver implements Archiver
     }
 
     @Override
+    public void setFileOwner( Owner owner )
+    {
+        target.setFileOwner( owner );
+    }
+
+    @Override
+    public Owner getFileOwner()
+    {
+        return target.getFileOwner();
+    }
+
+    @Override
+    public Owner getOverrideFileOwner()
+    {
+        return target.getOverrideFileOwner();
+    }
+
+    @Override
     public void setDefaultFileMode( int mode )
     {
         target.setDefaultFileMode( mode );
@@ -213,6 +248,18 @@ public class DelgatingArchiver implements Archiver
     public int getDefaultFileMode()
     {
         return target.getDefaultFileMode();
+    }
+
+    @Override
+    public void setDefaultFileOwner( Owner owner )
+    {
+        target.setDefaultFileOwner( owner );
+    }
+
+    @Override
+    public Owner getDefaultFileOwner()
+    {
+        return target.getFileOwner();
     }
 
     @Override
@@ -234,6 +281,24 @@ public class DelgatingArchiver implements Archiver
     }
 
     @Override
+    public void setDirectoryOwner( Owner owner )
+    {
+        target.setDirectoryOwner( owner );
+    }
+
+    @Override
+    public Owner getDirectoryOwner()
+    {
+        return target.getDirectoryOwner();
+    }
+
+    @Override
+    public Owner getOverrideDirectoryOwner()
+    {
+        return target.getOverrideDirectoryOwner();
+    }
+
+    @Override
     public void setDefaultDirectoryMode( int mode )
     {
         target.setDefaultDirectoryMode( mode );
@@ -243,6 +308,18 @@ public class DelgatingArchiver implements Archiver
     public int getDefaultDirectoryMode()
     {
         return target.getDefaultDirectoryMode();
+    }
+
+    @Override
+    public void setDefaultDirectoryOwner( Owner owner )
+    {
+        target.setDefaultDirectoryOwner( owner );
+    }
+
+    @Override
+    public Owner getDefaultDirectoryOwner()
+    {
+        return target.getDefaultDirectoryOwner();
     }
 
     @Override

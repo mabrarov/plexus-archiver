@@ -34,6 +34,7 @@ import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
+import org.codehaus.plexus.archiver.util.OwnerUtils;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.components.io.attributes.PlexusIoResourceAttributes;
 import org.codehaus.plexus.components.io.functions.ResourceAttributeSupplier;
@@ -59,6 +60,9 @@ public abstract class AbstractArchiver
     implements Archiver, Contextualizable, FinalizerEnabled
 {
 
+    private static final int UNDEFINED_UID = -1;
+    private static final int UNDEFINED_GID = -1;
+
     private Logger logger;
 
     private File destFile;
@@ -78,11 +82,19 @@ public abstract class AbstractArchiver
 
     private int forcedFileMode = -1; // Will always be used
 
+    private Owner forcedFileOwner = null;
+
     private int forcedDirectoryMode = -1; // Will always be used
+
+    private Owner forcedDirectoryOwner = null;
 
     private int defaultFileMode = -1; // Optionally used if a value is needed
 
+    private Owner defaultFileOwner = null;
+
     private int defaultDirectoryMode = -1; // Optionally used if a value is needed
+
+    private Owner defaultDirectoryOwner = null;
 
     private boolean forced = true;
 
@@ -114,13 +126,20 @@ public abstract class AbstractArchiver
 
         private final int forcedFileMode;
 
+        private final Owner forcedFileOwner;
+
         private final int forcedDirectoryMode;
 
-        public AddedResourceCollection( PlexusIoResourceCollection resources, int forcedFileMode, int forcedDirMode )
+        private final Owner forcedDirectoryOwner;
+
+        public AddedResourceCollection( PlexusIoResourceCollection resources, int forcedFileMode, Owner forcedFileOwner,
+                                        int forcedDirMode, Owner forcedDirOwner )
         {
             this.resources = resources;
             this.forcedFileMode = forcedFileMode;
+            this.forcedFileOwner = forcedFileOwner;
             this.forcedDirectoryMode = forcedDirMode;
+            this.forcedDirectoryOwner = forcedDirOwner;
         }
 
         private int maybeOverridden( int suggestedMode, boolean isDir )
@@ -133,6 +152,18 @@ public abstract class AbstractArchiver
             {
                 return forcedFileMode >= 0 ? forcedFileMode : suggestedMode;
 
+            }
+        }
+
+        private Owner maybeOverridden( Owner suggestedOwner, boolean isDir )
+        {
+            if ( isDir )
+            {
+                return forcedDirectoryOwner != null ? forcedDirectoryOwner : suggestedOwner;
+            }
+            else
+            {
+                return forcedFileOwner != null ? forcedFileOwner : suggestedOwner;
             }
         }
 
@@ -176,15 +207,33 @@ public abstract class AbstractArchiver
     }
 
     @Override
+    public void setFileOwner( Owner owner )
+    {
+        forcedFileOwner = owner;
+    }
+
+    @Override
     public final void setDefaultFileMode( final int mode )
     {
         defaultFileMode = ( mode & UnixStat.PERM_MASK ) | UnixStat.FILE_FLAG;
     }
 
     @Override
+    public void setDefaultFileOwner( Owner owner )
+    {
+        defaultFileOwner = owner;
+    }
+
+    @Override
     public final int getOverrideFileMode()
     {
         return forcedFileMode;
+    }
+
+    @Override
+    public Owner getOverrideFileOwner()
+    {
+        return forcedFileOwner;
     }
 
     @Override
@@ -204,9 +253,25 @@ public abstract class AbstractArchiver
     }
 
     @Override
+    public Owner getFileOwner()
+    {
+        if ( forcedFileOwner == null )
+        {
+            return defaultFileOwner;
+        }
+        return forcedFileOwner;
+    }
+
+    @Override
     public final int getDefaultFileMode()
     {
         return defaultFileMode;
+    }
+
+    @Override
+    public Owner getDefaultFileOwner()
+    {
+        return defaultFileOwner;
     }
 
     /**
@@ -232,15 +297,33 @@ public abstract class AbstractArchiver
     }
 
     @Override
+    public void setDirectoryOwner( Owner owner )
+    {
+        forcedDirectoryOwner = owner;
+    }
+
+    @Override
     public final void setDefaultDirectoryMode( final int mode )
     {
         defaultDirectoryMode = ( mode & UnixStat.PERM_MASK ) | UnixStat.DIR_FLAG;
     }
 
     @Override
+    public void setDefaultDirectoryOwner( Owner owner )
+    {
+        defaultDirectoryOwner = owner;
+    }
+
+    @Override
     public final int getOverrideDirectoryMode()
     {
         return forcedDirectoryMode;
+    }
+
+    @Override
+    public Owner getOverrideDirectoryOwner()
+    {
+        return forcedDirectoryOwner;
     }
 
     @Override
@@ -260,6 +343,16 @@ public abstract class AbstractArchiver
     }
 
     @Override
+    public Owner getDirectoryOwner()
+    {
+        if ( forcedDirectoryOwner == null )
+        {
+            return defaultDirectoryOwner;
+        }
+        return forcedDirectoryOwner;
+    }
+
+    @Override
     public final int getDefaultDirectoryMode()
     {
         if ( defaultDirectoryMode < 0 )
@@ -270,6 +363,12 @@ public abstract class AbstractArchiver
         {
             return defaultDirectoryMode;
         }
+    }
+
+    @Override
+    public Owner getDefaultDirectoryOwner()
+    {
+        return defaultDirectoryOwner;
     }
 
     @Override
@@ -348,14 +447,20 @@ public abstract class AbstractArchiver
         collection.setStreamTransformer( fileSet.getStreamTransformer() );
         collection.setFileMappers( fileSet.getFileMappers() );
 
-        if ( getOverrideDirectoryMode() > -1 || getOverrideFileMode() > -1 )
+        final Owner overrideFileOwner = getOverrideFileOwner();
+        if ( getOverrideDirectoryMode() > -1 || getOverrideFileMode() > -1 || overrideFileOwner != null )
         {
-            collection.setOverrideAttributes( -1, null, -1, null, getOverrideFileMode(), getOverrideDirectoryMode() );
+            collection.setOverrideAttributes( getUID( overrideFileOwner ), getUserName( overrideFileOwner ),
+                getGID( overrideFileOwner ), getGroupName( overrideFileOwner ), getOverrideFileMode(),
+                getOverrideDirectoryMode() );
         }
 
-        if ( getDefaultDirectoryMode() > -1 || getDefaultFileMode() > -1 )
+        final Owner defaultFileOwner = getDefaultFileOwner();
+        if ( getDefaultDirectoryMode() > -1 || getDefaultFileMode() > -1 || defaultFileOwner != null )
         {
-            collection.setDefaultAttributes( -1, null, -1, null, getDefaultFileMode(), getDefaultDirectoryMode() );
+            collection.setDefaultAttributes( getUID( defaultFileOwner ), getUserName( defaultFileOwner ),
+                getGID( defaultFileOwner ), getGroupName( defaultFileOwner ), getDefaultFileMode(),
+                getDefaultDirectoryMode() );
         }
 
         addResources( collection );
@@ -383,12 +488,25 @@ public abstract class AbstractArchiver
     public void addSymlink( String symlinkName, int permissions, String symlinkDestination )
         throws ArchiverException
     {
+        addSymlink( symlinkName, permissions, getOverrideFileOwner(), symlinkDestination );
+    }
+
+    @Override
+    public void addSymlink( String symlinkName, int permissions, Owner owner, String symlinkDestination )
+        throws ArchiverException
+    {
+        if ( owner == null )
+        {
+            owner = getOverrideFileOwner();
+        }
         doAddResource(
-            ArchiveEntry.createSymlinkEntry( symlinkName, permissions, symlinkDestination, getDirectoryMode() ) );
+            ArchiveEntry.createSymlinkEntry( symlinkName, permissions, owner, symlinkDestination,
+                getDirectoryMode(), getDirectoryOwner() ) );
     }
 
     protected ArchiveEntry asArchiveEntry( @Nonnull final PlexusIoResource resource, final String destFileName,
-                                           final int permissions, PlexusIoResourceCollection collection )
+                                           final int permissions, final Owner owner,
+                                           PlexusIoResourceCollection collection )
         throws ArchiverException
     {
         if ( !resource.isExisting() )
@@ -398,11 +516,13 @@ public abstract class AbstractArchiver
 
         if ( resource.isFile() )
         {
-            return ArchiveEntry.createFileEntry( destFileName, resource, permissions, collection, getDirectoryMode() );
+            return ArchiveEntry.createFileEntry( destFileName, resource, permissions, owner, collection,
+                getDirectoryMode(), getDirectoryOwner() );
         }
         else
         {
-            return ArchiveEntry.createDirectoryEntry( destFileName, resource, permissions, getDirectoryMode() );
+            return ArchiveEntry.createDirectoryEntry( destFileName, resource, permissions, owner, getDirectoryMode(),
+                getDirectoryOwner() );
         }
     }
 
@@ -412,6 +532,7 @@ public abstract class AbstractArchiver
         final String destFileName = collection.resources.getName( resource );
 
         int fromResource = PlexusIoResourceAttributes.UNKNOWN_OCTAL_MODE;
+        Owner fromResourceOwner = null;
         if ( resource instanceof ResourceAttributeSupplier )
         {
             final PlexusIoResourceAttributes attrs = ( (ResourceAttributeSupplier) resource ).getAttributes();
@@ -419,11 +540,13 @@ public abstract class AbstractArchiver
             if ( attrs != null )
             {
                 fromResource = attrs.getOctalMode();
+                fromResourceOwner = OwnerUtils.buildOwner(attrs);
             }
         }
 
         return asArchiveEntry( resource, destFileName,
                                collection.maybeOverridden( fromResource, resource.isDirectory() ),
+                               collection.maybeOverridden( fromResourceOwner, resource.isDirectory() ),
                                collection.resources );
     }
 
@@ -431,12 +554,31 @@ public abstract class AbstractArchiver
     public void addResource( final PlexusIoResource resource, final String destFileName, final int permissions )
         throws ArchiverException
     {
-        doAddResource( asArchiveEntry( resource, destFileName, permissions, null ) );
+        final Owner owner = resource.isFile() ? getOverrideFileOwner() : getOverrideDirectoryOwner();
+        doAddResource( asArchiveEntry( resource, destFileName, permissions, owner, null ) );
+    }
+
+    @Override
+    public void addResource( final PlexusIoResource resource, final String destFileName, final int permissions,
+                             Owner owner)
+        throws ArchiverException
+    {
+        if ( owner == null )
+        {
+            owner = resource.isFile() ? getOverrideFileOwner() : getOverrideDirectoryOwner();
+        }
+        doAddResource( asArchiveEntry( resource, destFileName, permissions, owner, null ) );
     }
 
     @Override
     public void addFile( @Nonnull final File inputFile, @Nonnull String destFileName, int permissions )
-        throws ArchiverException
+    {
+        addFile(inputFile, destFileName, permissions, getOverrideFileOwner());
+    }
+
+    @Override
+    public void addFile( @Nonnull final File inputFile, @Nonnull String destFileName, int permissions,
+                         Owner owner )
     {
         if ( !inputFile.isFile() || !inputFile.exists() )
         {
@@ -453,10 +595,16 @@ public abstract class AbstractArchiver
             permissions = getOverrideFileMode();
         }
 
+        if ( owner == null )
+        {
+            owner = getOverrideFileOwner();
+        }
+
         try
         {
             // do a null check here, to avoid creating a file stream if there are no filters...
-            doAddResource( ArchiveEntry.createFileEntry( destFileName, inputFile, permissions, getDirectoryMode() ) );
+            doAddResource( ArchiveEntry.createFileEntry( destFileName, inputFile, permissions, owner,
+                getDirectoryMode(), getDirectoryOwner() ) );
         }
         catch ( final IOException e )
         {
@@ -740,14 +888,20 @@ public abstract class AbstractArchiver
         proxy.setStreamTransformer( fileSet.getStreamTransformer() );
         proxy.setFileMappers( fileSet.getFileMappers() );
 
-        if ( getOverrideDirectoryMode() > -1 || getOverrideFileMode() > -1 )
+        final Owner overrideFileOwner = getOverrideFileOwner();
+        if ( getOverrideDirectoryMode() > -1 || getOverrideFileMode() > -1 || overrideFileOwner != null )
         {
-            proxy.setOverrideAttributes( -1, null, -1, null, getOverrideFileMode(), getOverrideDirectoryMode() );
+            proxy.setOverrideAttributes( getUID( overrideFileOwner ), getUserName( overrideFileOwner ),
+                getGID( overrideFileOwner ), getGroupName( overrideFileOwner ), getOverrideFileMode(),
+                getOverrideDirectoryMode() );
         }
 
-        if ( getDefaultDirectoryMode() > -1 || getDefaultFileMode() > -1 )
+        final Owner defaultFileOwner = getDefaultFileOwner();
+        if ( getDefaultDirectoryMode() > -1 || getDefaultFileMode() > -1 || defaultFileOwner != null )
         {
-            proxy.setDefaultAttributes( -1, null, -1, null, getDefaultFileMode(), getDefaultDirectoryMode() );
+            proxy.setDefaultAttributes( getUID( defaultFileOwner ), getUserName( defaultFileOwner ),
+                getGID( defaultFileOwner ), getGroupName( defaultFileOwner ), getDefaultFileMode(),
+                getDefaultDirectoryMode() );
         }
 
         return proxy;
@@ -760,7 +914,8 @@ public abstract class AbstractArchiver
     public void addResources( final PlexusIoResourceCollection collection )
         throws ArchiverException
     {
-        doAddResource( new AddedResourceCollection( collection, forcedFileMode, forcedDirectoryMode ) );
+        doAddResource( new AddedResourceCollection( collection, forcedFileMode, forcedFileOwner, forcedDirectoryMode,
+            forcedDirectoryOwner ) );
     }
 
     private void doAddResource( Object item )
@@ -1132,6 +1287,36 @@ public abstract class AbstractArchiver
     public void setIgnorePermissions( final boolean ignorePermissions )
     {
         this.ignorePermissions = ignorePermissions;
+    }
+
+    private static int getUID( final Owner owner )
+    {
+        if ( owner == null )
+        {
+            return UNDEFINED_UID;
+        }
+        final Integer uid = owner.getUserId();
+        return uid == null ? UNDEFINED_UID : uid;
+    }
+
+    private static String getUserName( final Owner owner )
+    {
+        return owner == null ? null : owner.getUserName();
+    }
+
+    private static int getGID( final Owner owner )
+    {
+        if ( owner == null )
+        {
+            return UNDEFINED_GID;
+        }
+        final Integer gid = owner.getGroupId();
+        return gid == null ? UNDEFINED_GID : gid;
+    }
+
+    private static String getGroupName( final Owner owner )
+    {
+        return owner == null ? null : owner.getGroupName();
     }
 
 }

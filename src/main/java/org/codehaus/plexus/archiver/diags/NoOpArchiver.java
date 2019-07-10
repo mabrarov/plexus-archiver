@@ -26,6 +26,7 @@ import org.codehaus.plexus.archiver.ArchivedFileSet;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.FileSet;
+import org.codehaus.plexus.archiver.Owner;
 import org.codehaus.plexus.archiver.ResourceIterator;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
 import org.codehaus.plexus.components.io.resources.PlexusIoResourceCollection;
@@ -98,6 +99,13 @@ public class NoOpArchiver implements Archiver
     }
 
     @Override
+    public void addSymlink( String symlinkName, int permissions, Owner owner, String symlinkDestination )
+        throws ArchiverException
+    {
+
+    }
+
+    @Override
     public void addFile( @Nonnull File inputFile, @Nonnull String destFileName )
         throws ArchiverException
     {
@@ -106,6 +114,13 @@ public class NoOpArchiver implements Archiver
 
     @Override
     public void addFile( @Nonnull File inputFile, @Nonnull String destFileName, int permissions )
+        throws ArchiverException
+    {
+
+    }
+
+    @Override
+    public void addFile( @Nonnull File inputFile, @Nonnull String destFileName, int permissions, Owner owner )
         throws ArchiverException
     {
 
@@ -161,6 +176,13 @@ public class NoOpArchiver implements Archiver
     }
 
     @Override
+    public void addResource( PlexusIoResource resource, String destFileName, int permissions, Owner owner )
+        throws ArchiverException
+    {
+
+    }
+
+    @Override
     public void addResources( PlexusIoResourceCollection resources )
         throws ArchiverException
     {
@@ -198,6 +220,24 @@ public class NoOpArchiver implements Archiver
     }
 
     @Override
+    public void setFileOwner( Owner owner )
+    {
+
+    }
+
+    @Override
+    public Owner getFileOwner()
+    {
+        return null;
+    }
+
+    @Override
+    public Owner getOverrideFileOwner()
+    {
+        return null;
+    }
+
+    @Override
     public void setDefaultFileMode( int mode )
     {
 
@@ -207,6 +247,18 @@ public class NoOpArchiver implements Archiver
     public int getDefaultFileMode()
     {
         return 0;
+    }
+
+    @Override
+    public void setDefaultFileOwner( Owner owner )
+    {
+
+    }
+
+    @Override
+    public Owner getDefaultFileOwner()
+    {
+        return null;
     }
 
     @Override
@@ -228,6 +280,24 @@ public class NoOpArchiver implements Archiver
     }
 
     @Override
+    public void setDirectoryOwner( Owner owner )
+    {
+
+    }
+
+    @Override
+    public Owner getDirectoryOwner()
+    {
+        return null;
+    }
+
+    @Override
+    public Owner getOverrideDirectoryOwner()
+    {
+        return null;
+    }
+
+    @Override
     public void setDefaultDirectoryMode( int mode )
     {
 
@@ -237,6 +307,18 @@ public class NoOpArchiver implements Archiver
     public int getDefaultDirectoryMode()
     {
         return 0;
+    }
+
+    @Override
+    public void setDefaultDirectoryOwner( Owner owner )
+    {
+
+    }
+
+    @Override
+    public Owner getDefaultDirectoryOwner()
+    {
+        return null;
     }
 
     @Override

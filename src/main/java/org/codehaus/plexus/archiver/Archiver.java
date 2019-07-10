@@ -134,11 +134,17 @@ public interface Archiver
     void addSymlink( String symlinkName, int permissions, String symlinkDestination )
         throws ArchiverException;
 
+    void addSymlink( String symlinkName, int permissions, Owner owner, String symlinkDestination )
+        throws ArchiverException;
+
     void addFile( @Nonnull File inputFile, @Nonnull String destFileName )
         throws ArchiverException;
 
     void addFile( @Nonnull File inputFile, @Nonnull String destFileName, int permissions )
         throws ArchiverException;
+
+    void addFile( @Nonnull File inputFile, @Nonnull String destFileName, int permissions, Owner owner)
+    throws ArchiverException;
 
     /**
      * Obsolete, use {@link #addArchivedFileSet(ArchivedFileSet)}. You can use "inline" of this method in your
@@ -222,6 +228,12 @@ public interface Archiver
         throws ArchiverException;
 
     /**
+     * TODO: provide description
+     */
+    void addResource( PlexusIoResource resource, String destFileName, int permissions, Owner owner )
+        throws ArchiverException;
+
+    /**
      * Adds the given resource collection to the archive.
      *
      * Stream transformers are supported om this method
@@ -241,9 +253,19 @@ public interface Archiver
 
     int getOverrideFileMode();
 
+    void setFileOwner( Owner owner );
+
+    Owner getFileOwner();
+
+    Owner getOverrideFileOwner();
+
     void setDefaultFileMode( int mode );
 
     int getDefaultFileMode();
+
+    void setDefaultFileOwner( Owner owner );
+
+    Owner getDefaultFileOwner();
 
     /**
      * This is the forced mode that should be used regardless if set, otherwise falls back to default.
@@ -262,6 +284,17 @@ public interface Archiver
     int getOverrideDirectoryMode();
 
     /**
+     * This is the forced mode that should be used regardless if set, otherwise falls back to default.
+     *
+     * @param owner
+     */
+    void setDirectoryOwner( Owner owner );
+
+    Owner getDirectoryOwner();
+
+    Owner getOverrideDirectoryOwner();
+
+    /**
      * This is the "default" value we should use if no other value is specified
      *
      * @param mode
@@ -269,6 +302,15 @@ public interface Archiver
     void setDefaultDirectoryMode( int mode );
 
     int getDefaultDirectoryMode();
+
+    /**
+     * This is the "default" value we should use if no other value is specified
+     *
+     * @param owner
+     */
+    void setDefaultDirectoryOwner( Owner owner );
+
+    Owner getDefaultDirectoryOwner();
 
     boolean getIncludeEmptyDirs();
 

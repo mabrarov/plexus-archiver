@@ -31,6 +31,7 @@ import org.codehaus.plexus.archiver.ArchivedFileSet;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.FileSet;
+import org.codehaus.plexus.archiver.Owner;
 import org.codehaus.plexus.archiver.ResourceIterator;
 import org.codehaus.plexus.components.io.attributes.PlexusIoResourceAttributes;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
@@ -111,6 +112,14 @@ public class TrackingArchiver
     }
 
     @Override
+    public void addFile( final @Nonnull File inputFile, final @Nonnull String destFileName, final int permissions,
+                         final Owner owner )
+        throws ArchiverException
+    {
+        added.add( new Addition( inputFile, destFileName, null, null, permissions, owner ) );
+    }
+
+    @Override
     public void addArchivedFileSet( final @Nonnull File archiveFile )
         throws ArchiverException
     {
@@ -137,6 +146,13 @@ public class TrackingArchiver
     {
         added.add( new Addition( s, null, null, null, PlexusIoResourceAttributes.UNKNOWN_OCTAL_MODE ) );
 
+    }
+
+    @Override
+    public void addSymlink( String s, int i, Owner owner, String s2 )
+        throws ArchiverException
+    {
+        added.add( new Addition( s, null, null, null, PlexusIoResourceAttributes.UNKNOWN_OCTAL_MODE, owner ) );
     }
 
     @Override
@@ -180,6 +196,14 @@ public class TrackingArchiver
     }
 
     @Override
+    public void addResource( final PlexusIoResource resource, final String destFileName, final int permissions,
+                             final Owner owner )
+        throws ArchiverException
+    {
+        added.add( new Addition( resource, destFileName, null, null, permissions, owner ) );
+    }
+
+    @Override
     public void addResources( final PlexusIoResourceCollection resources )
         throws ArchiverException
     {
@@ -216,6 +240,24 @@ public class TrackingArchiver
     }
 
     @Override
+    public void setFileOwner( Owner owner )
+    {
+
+    }
+
+    @Override
+    public Owner getFileOwner()
+    {
+        return null;
+    }
+
+    @Override
+    public Owner getOverrideFileOwner()
+    {
+        return null;
+    }
+
+    @Override
     public void setDefaultFileMode( final int mode )
     {
     }
@@ -224,6 +266,18 @@ public class TrackingArchiver
     public int getDefaultFileMode()
     {
         return Integer.parseInt( "0644", 8 );
+    }
+
+    @Override
+    public void setDefaultFileOwner( Owner owner )
+    {
+
+    }
+
+    @Override
+    public Owner getDefaultFileOwner()
+    {
+        return null;
     }
 
     @Override
@@ -244,6 +298,24 @@ public class TrackingArchiver
     }
 
     @Override
+    public void setDirectoryOwner( Owner owner )
+    {
+
+    }
+
+    @Override
+    public Owner getDirectoryOwner()
+    {
+        return null;
+    }
+
+    @Override
+    public Owner getOverrideDirectoryOwner()
+    {
+        return null;
+    }
+
+    @Override
     public void setDefaultDirectoryMode( final int mode )
     {
     }
@@ -252,6 +324,18 @@ public class TrackingArchiver
     public int getDefaultDirectoryMode()
     {
         return Integer.parseInt( "0755", 8 );
+    }
+
+    @Override
+    public void setDefaultDirectoryOwner( Owner owner )
+    {
+
+    }
+
+    @Override
+    public Owner getDefaultDirectoryOwner()
+    {
+        return null;
     }
 
     @Override
@@ -340,6 +424,8 @@ public class TrackingArchiver
 
         public final int permissions;
 
+        public final Owner owner;
+
         public final String[] includes;
 
         public final String[] excludes;
@@ -347,7 +433,14 @@ public class TrackingArchiver
         public Addition( final Object resource, final String destination, final String[] includes,
                          final String[] excludes, final int permissions )
         {
+            this(resource, destination, includes, excludes, permissions, null);
+        }
+
+        public Addition( final Object resource, final String destination, final String[] includes,
+                         final String[] excludes, final int permissions, final Owner owner )
+        {
             this.resource = resource;
+            this.owner = owner;
             if ( resource instanceof FileSet )
             {
                 final FileSet fs = (FileSet) resource;

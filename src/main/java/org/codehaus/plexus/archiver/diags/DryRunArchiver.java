@@ -26,6 +26,7 @@ import org.codehaus.plexus.archiver.ArchivedFileSet;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.FileSet;
+import org.codehaus.plexus.archiver.Owner;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
 import org.codehaus.plexus.components.io.resources.PlexusIoResourceCollection;
 import org.codehaus.plexus.logging.Logger;
@@ -130,6 +131,16 @@ public class DryRunArchiver
      * {@inheritDoc}
      */
     @Override
+    public void addSymlink( String symlinkName, int permissions, Owner owner, String symlinkDestination )
+        throws ArchiverException
+    {
+        debug( "DRY RUN: Skipping delegated call to: " + getMethodName() );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void addDirectory( final @Nonnull File directory, final String prefix )
         throws ArchiverException
     {
@@ -161,6 +172,17 @@ public class DryRunArchiver
      */
     @Override
     public void addFile( final @Nonnull File inputFile, final @Nonnull String destFileName, final int permissions )
+        throws ArchiverException
+    {
+        debug( "DRY RUN: Skipping delegated call to: " + getMethodName() );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addFile( final @Nonnull File inputFile, final @Nonnull String destFileName, final int permissions,
+                         final Owner owner )
         throws ArchiverException
     {
         debug( "DRY RUN: Skipping delegated call to: " + getMethodName() );
@@ -226,6 +248,13 @@ public class DryRunArchiver
 
     @Override
     public void addResource( PlexusIoResource resource, String destFileName, int permissions )
+        throws ArchiverException
+    {
+        debug( "DRY RUN: Skipping delegated call to: " + getMethodName() );
+    }
+
+    @Override
+    public void addResource( PlexusIoResource resource, String destFileName, int permissions, Owner owner )
         throws ArchiverException
     {
         debug( "DRY RUN: Skipping delegated call to: " + getMethodName() );
