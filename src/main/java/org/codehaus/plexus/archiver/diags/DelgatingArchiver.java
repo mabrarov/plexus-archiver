@@ -20,8 +20,13 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 import javax.annotation.Nonnull;
-
-import org.codehaus.plexus.archiver.*;
+import org.codehaus.plexus.archiver.ArchiveEntry;
+import org.codehaus.plexus.archiver.ArchivedFileSet;
+import org.codehaus.plexus.archiver.Archiver;
+import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.FileSet;
+import org.codehaus.plexus.archiver.Owner;
+import org.codehaus.plexus.archiver.ResourceIterator;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
 import org.codehaus.plexus.components.io.resources.PlexusIoResourceCollection;
 
