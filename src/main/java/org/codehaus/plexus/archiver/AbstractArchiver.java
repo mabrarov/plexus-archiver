@@ -501,7 +501,7 @@ public abstract class AbstractArchiver
         }
         doAddResource(
             ArchiveEntry.createSymlinkEntry( symlinkName, permissions, owner, symlinkDestination,
-                getDirectoryMode() ) );
+                getDirectoryMode(), getDirectoryOwner() ) );
     }
 
     protected ArchiveEntry asArchiveEntry( @Nonnull final PlexusIoResource resource, final String destFileName,
@@ -517,11 +517,12 @@ public abstract class AbstractArchiver
         if ( resource.isFile() )
         {
             return ArchiveEntry.createFileEntry( destFileName, resource, permissions, owner, collection,
-                getDirectoryMode() );
+                getDirectoryMode(), getDirectoryOwner() );
         }
         else
         {
-            return ArchiveEntry.createDirectoryEntry( destFileName, resource, permissions, owner, getDirectoryMode() );
+            return ArchiveEntry.createDirectoryEntry( destFileName, resource, permissions, owner, getDirectoryMode(),
+                    getDirectoryOwner() );
         }
     }
 
@@ -603,7 +604,7 @@ public abstract class AbstractArchiver
         {
             // do a null check here, to avoid creating a file stream if there are no filters...
             doAddResource( ArchiveEntry.createFileEntry( destFileName, inputFile, permissions, owner,
-                getDirectoryMode() ) );
+                getDirectoryMode(), getDirectoryOwner() ) );
         }
         catch ( final IOException e )
         {

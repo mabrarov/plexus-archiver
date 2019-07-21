@@ -18,6 +18,7 @@ package org.codehaus.plexus.archiver.jar;
 
 import org.apache.commons.compress.parallel.InputStreamSupplier;
 import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.Owner;
 import org.codehaus.plexus.archiver.zip.ConcurrentJarCreator;
 
 import java.io.File;
@@ -81,7 +82,7 @@ public class JarToolModularJarArchiver
     @Override
     protected void zipFile( InputStreamSupplier is, ConcurrentJarCreator zOut,
                             String vPath, long lastModified, File fromArchive,
-                            int mode, String symlinkDestination,
+                            int mode, Owner owner, String symlinkDestination,
                             boolean addInParallel )
         throws IOException, ArchiverException
     {
@@ -93,7 +94,7 @@ public class JarToolModularJarArchiver
         }
 
         super.zipFile( is, zOut, vPath, lastModified,
-            fromArchive, mode, symlinkDestination, addInParallel );
+            fromArchive, mode, owner, symlinkDestination, addInParallel );
     }
 
     @Override
