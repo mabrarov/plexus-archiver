@@ -174,6 +174,11 @@ public abstract class AbstractArchiver
      */
     private boolean ignorePermissions = false;
 
+    /**
+     * @since 4.1.1
+     */
+    private boolean ignoreOwner = false;
+
     @Override
     public String getDuplicateBehavior()
     {
@@ -1286,6 +1291,21 @@ public abstract class AbstractArchiver
     public void setIgnorePermissions( final boolean ignorePermissions )
     {
         this.ignorePermissions = ignorePermissions;
+    }
+
+    /**
+     * @since 4.1.1
+     */
+    @Override
+    public boolean isIgnoreOwner()
+    {
+        return ignoreOwner;
+    }
+
+    @Override
+    public void setIgnoreOwner( final boolean ignoreOwner )
+    {
+        this.ignoreOwner = ignoreOwner;
     }
 
     private static int getUID( final Owner owner )

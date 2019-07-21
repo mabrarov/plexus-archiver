@@ -154,6 +154,7 @@ public class DirectoryArchiver
             ResourceUtils.copyFile( entry.getInputStream(), outFile );
 
             setFileModes( entry, outFile, inLastModified );
+            setOutFileOwner( entry, outFile, inLastModified );
         }
         else
         { // file is a directory
@@ -180,6 +181,7 @@ public class DirectoryArchiver
                 public void run()
                 {
                     setFileModes( entry, outFile, inLastModified );
+                    setOutFileOwner( entry, outFile, inLastModified );
                 }
 
             } );
@@ -194,9 +196,24 @@ public class DirectoryArchiver
             ArchiveEntryUtils.chmod( outFile, entry.getMode() );
         }
 
-        outFile.setLastModified( inLastModified == PlexusIoResource.UNKNOWN_MODIFICATION_DATE
-                                     ? System.currentTimeMillis()
-                                     : inLastModified );
+        updateLastModifiedTimestamp( outFile, inLastModified );
+    }
+
+    private void setOutFileOwner( ArchiveEntry entry, File outFile, long inLastModified )
+    {
+        if ( !isIgnoreOwner() )
+        {
+            ArchiveEntryUtils.chown( outFile, entry.getOwner() );
+        }
+
+        updateLastModifiedTimestamp( outFile, inLastModified );
+    }
+
+    private boolean updateLastModifiedTimestamp( File file, long inLastModified )
+    {
+        return file.setLastModified( inLastModified == PlexusIoResource.UNKNOWN_MODIFICATION_DATE
+            ? System.currentTimeMillis()
+            : inLastModified );
     }
 
     @Override

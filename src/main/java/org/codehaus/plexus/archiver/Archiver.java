@@ -436,4 +436,14 @@ public interface Archiver
      */
     void setIgnorePermissions( final boolean ignorePermissions );
 
+    /**
+     * @since 4.1.1
+     */
+    boolean isIgnoreOwner();
+
+    /**
+     * @since 4.1.1
+     */
+    void setIgnoreOwner( final boolean ignoreOwner );
+
 }

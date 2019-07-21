@@ -53,6 +53,8 @@ public class TrackingArchiver
 
     private boolean ignorePermissions;
 
+    private boolean ignoreOwner;
+
     @Override
     public void createArchive()
         throws ArchiverException, IOException
@@ -492,6 +494,18 @@ public class TrackingArchiver
     public void setIgnorePermissions( final boolean ignorePermissions )
     {
         this.ignorePermissions = ignorePermissions;
+    }
+
+    @Override
+    public boolean isIgnoreOwner()
+    {
+        return ignoreOwner;
+    }
+
+    @Override
+    public void setIgnoreOwner( final boolean ignoreOwner )
+    {
+        this.ignoreOwner = ignoreOwner;
     }
 
 }

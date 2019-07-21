@@ -17,7 +17,16 @@ package org.codehaus.plexus.archiver.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.attribute.GroupPrincipal;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.Owner;
 import org.codehaus.plexus.components.io.attributes.AttributeUtils;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.Os;
@@ -75,6 +84,111 @@ public final class ArchiveEntryUtils
         catch ( IOException e )
         {
             throw new ArchiverException( "Failed setting file attributes", e );
+        }
+    }
+
+    public static void chown( final File file, final Owner owner ) throws ArchiverException
+    {
+        if ( owner == null )
+        {
+            return;
+        }
+        final String userName = owner.getUserName();
+        final String groupName = owner.getGroupName();
+        if ( userName == null && groupName == null )
+        {
+            return;
+        }
+        final Path path = file.toPath();
+        final UserPrincipalLookupService principalLookupService = getPrincipalLookupService( path );
+        if ( principalLookupService == null )
+        {
+            // Lookup for user and group are not supported by filesystem created file
+            return;
+        }
+        if ( userName != null )
+        {
+            setOwner( path, getUserPrincipal( principalLookupService, userName ) );
+        }
+        if ( groupName != null )
+        {
+            setGroup( path, getGroupPrincipal( principalLookupService, groupName ) );
+        }
+    }
+
+    private static UserPrincipalLookupService getPrincipalLookupService( final Path path )
+    {
+        try
+        {
+            return path.getFileSystem().getUserPrincipalLookupService();
+        }
+        catch ( UnsupportedOperationException e )
+        {
+            return null;
+        }
+    }
+
+    private static UserPrincipal getUserPrincipal( final UserPrincipalLookupService principalLookupService,
+                                                   final String userName )
+    {
+        try
+        {
+            return principalLookupService.lookupPrincipalByName( userName );
+        }
+        catch ( UserPrincipalNotFoundException e )
+        {
+            throw new ArchiverException( "User not found", e );
+        }
+        catch ( IOException e )
+        {
+            throw new ArchiverException( "User lookup failed", e );
+        }
+    }
+
+    private static GroupPrincipal getGroupPrincipal( final UserPrincipalLookupService principalLookupService,
+                                                     final String groupName )
+    {
+        try
+        {
+            return principalLookupService.lookupPrincipalByGroupName( groupName );
+        }
+        catch ( UserPrincipalNotFoundException e )
+        {
+            throw new ArchiverException( "Group not found", e );
+        }
+        catch ( IOException e )
+        {
+            throw new ArchiverException( "Group lookup failed", e );
+        }
+    }
+
+    private static void setOwner( final Path path, final UserPrincipal userPrincipal )
+    {
+        try
+        {
+            Files.setOwner( path, userPrincipal );
+        }
+        catch ( IOException e )
+        {
+            throw new ArchiverException( "Failed setting file owner", e );
+        }
+    }
+
+    private static void setGroup( final Path path, final GroupPrincipal groupPrincipal )
+    {
+        final PosixFileAttributeView attributeView = Files.getFileAttributeView( path, PosixFileAttributeView.class,
+                LinkOption.NOFOLLOW_LINKS );
+        if ( attributeView == null )
+        {
+            return;
+        }
+        try
+        {
+            attributeView.setGroup( groupPrincipal );
+        }
+        catch ( IOException e )
+        {
+            throw new ArchiverException( "Failed setting file group", e );
         }
     }
 
