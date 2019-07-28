@@ -39,6 +39,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.parallel.InputStreamSupplier;
 import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.Owner;
 import org.codehaus.plexus.archiver.zip.ConcurrentJarCreator;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
 import org.codehaus.plexus.logging.Logger;
@@ -380,14 +381,14 @@ public class JarArchiver
             getLogger().warn( "Manifest warning: " + e.nextElement() );
         }
 
-        zipDir( null, zOut, "META-INF/", DEFAULT_DIR_MODE, getEncoding() );
+        zipDir( null, zOut, "META-INF/", DEFAULT_DIR_MODE, null, getEncoding() );
         // time to write the manifest
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         manifest.write( baos );
 
         ByteArrayInputStream bais = new ByteArrayInputStream( baos.toByteArray() );
         super.zipFile( createInputStreamSupplier( bais ), zOut, MANIFEST_NAME, System.currentTimeMillis(), null,
-                       DEFAULT_FILE_MODE, null, false );
+                       DEFAULT_FILE_MODE, null, null, false );
         super.initZipOutputStream( zOut );
     }
 
@@ -491,7 +492,7 @@ public class JarArchiver
         ByteArrayInputStream bais = new ByteArrayInputStream( baos.toByteArray() );
 
         super.zipFile( createInputStreamSupplier( bais ), zOut, INDEX_NAME, System.currentTimeMillis(), null,
-                       DEFAULT_FILE_MODE, null, true );
+                       DEFAULT_FILE_MODE, null, null, true );
     }
 
     /**
@@ -500,7 +501,7 @@ public class JarArchiver
     @Override
     protected void zipFile( InputStreamSupplier is, ConcurrentJarCreator zOut, String vPath,
                             long lastModified, File fromArchive,
-                            int mode, String symlinkDestination, boolean addInParallel )
+                            int mode, Owner owner, String symlinkDestination, boolean addInParallel )
         throws IOException, ArchiverException
     {
         if ( MANIFEST_NAME.equalsIgnoreCase( vPath ) )
@@ -524,7 +525,7 @@ public class JarArchiver
             {
                 rootEntries.addElement( vPath );
             }
-            super.zipFile( is, zOut, vPath, lastModified, fromArchive, mode, symlinkDestination, addInParallel );
+            super.zipFile( is, zOut, vPath, lastModified, fromArchive, mode, owner, symlinkDestination, addInParallel );
         }
     }
 

@@ -29,6 +29,7 @@ import java.util.Hashtable;
 import java.util.Stack;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.CRC32;
+import org.apache.commons.compress.archivers.zip.X7875_NewUnix;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipEncoding;
@@ -39,6 +40,7 @@ import org.codehaus.plexus.archiver.AbstractArchiver;
 import org.codehaus.plexus.archiver.ArchiveEntry;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.Owner;
 import org.codehaus.plexus.archiver.ResourceIterator;
 import org.codehaus.plexus.archiver.UnixStat;
 import org.codehaus.plexus.archiver.exceptions.EmptyArchiveException;
@@ -310,8 +312,8 @@ public abstract class AbstractZipArchiver
     /**
      * Gets the {@code UnicodeExtraFieldPolicy} to apply.
      *
-     * @return {@link ZipArchiveOutputStream.UnicodeExtraFieldPolicy.NEVER}, if the effective encoding is
-     * UTF-8; {@link ZipArchiveOutputStream.UnicodeExtraFieldPolicy.ALWAYS}, if the effective encoding is not
+     * @return {@link ZipArchiveOutputStream.UnicodeExtraFieldPolicy#NEVER}, if the effective encoding is
+     * UTF-8; {@link ZipArchiveOutputStream.UnicodeExtraFieldPolicy#ALWAYS}, if the effective encoding is not
      * UTF-8.
      *
      * @see #getEncoding()
@@ -387,7 +389,7 @@ public abstract class AbstractZipArchiver
             }
             else
             {
-                zipDir( entry.getResource(), zOut, name, entry.getMode(), encoding );
+                zipDir( entry.getResource(), zOut, name, entry.getMode(), entry.getOwner(), encoding );
             }
         }
     }
@@ -425,7 +427,7 @@ public abstract class AbstractZipArchiver
                 // the
                 // At this point we could do something like read the atr
                 final PlexusIoResource res = new AnonymousResource( f );
-                zipDir( res, zOut, dir, archiveEntry.getDefaultDirMode(), encoding );
+                zipDir( res, zOut, dir, archiveEntry.getDefaultDirMode(), archiveEntry.getDefaultDirOwner(), encoding );
             }
         }
     }
@@ -449,7 +451,7 @@ public abstract class AbstractZipArchiver
     } )
     protected void zipFile( InputStreamSupplier in, ConcurrentJarCreator zOut, String vPath,
                             long lastModified,
-                            File fromArchive, int mode, String symlinkDestination, boolean addInParallel )
+                            File fromArchive, int mode, Owner owner, String symlinkDestination, boolean addInParallel )
         throws IOException, ArchiverException
     {
         getLogger().debug( "adding entry " + vPath );
@@ -463,6 +465,7 @@ public abstract class AbstractZipArchiver
 
             ze.setMethod( doCompress ? ZipArchiveEntry.DEFLATED : ZipArchiveEntry.STORED );
             ze.setUnixMode( UnixStat.FILE_FLAG | mode );
+            setEntryOwner( ze, owner );
 
             InputStream payload;
             if ( ze.isUnixSymlink() )
@@ -521,8 +524,8 @@ public abstract class AbstractZipArchiver
         };
         try
         {
-            zipFile( in, zOut, vPath, resource.getLastModified(), null, entry.getMode(), symlinkTarget,
-                     !entry.shouldAddSynchronously() );
+            zipFile( in, zOut, vPath, resource.getLastModified(), null, entry.getMode(), entry.getOwner(),
+                    symlinkTarget, !entry.shouldAddSynchronously() );
         }
         catch ( IOException e )
         {
@@ -556,7 +559,7 @@ public abstract class AbstractZipArchiver
          */
     }
 
-    protected void zipDir( PlexusIoResource dir, ConcurrentJarCreator zOut, String vPath, int mode,
+    protected void zipDir( PlexusIoResource dir, ConcurrentJarCreator zOut, String vPath, int mode, Owner owner,
                            String encodingToUse )
         throws IOException
     {
@@ -607,6 +610,7 @@ public abstract class AbstractZipArchiver
                 ze.setCrc( EMPTY_CRC );
             }
             ze.setUnixMode( mode );
+            setEntryOwner( ze, owner );
 
             if ( !isSymlink )
             {
@@ -835,6 +839,30 @@ public abstract class AbstractZipArchiver
     protected String getArchiveType()
     {
         return archiveType;
+    }
+
+    private void setEntryOwner( ZipArchiveEntry entry, Owner owner )
+    {
+        if ( owner == null )
+        {
+            return;
+        }
+        final Integer userId = owner.getUserId();
+        final Integer groupId = owner.getGroupId();
+        if (userId == null && groupId == null)
+        {
+            return;
+        }
+        final X7875_NewUnix entryOwner = new X7875_NewUnix();
+        if ( userId != null )
+        {
+            entryOwner.setUID( userId );
+        }
+        if ( groupId != null )
+        {
+            entryOwner.setGID( groupId );
+        }
+        entry.addExtraField( entryOwner );
     }
 
 }
