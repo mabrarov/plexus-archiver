@@ -201,9 +201,9 @@ public class DirectoryArchiver
 
     private void setOutFileOwner( ArchiveEntry entry, File outFile, long inLastModified )
     {
-        if ( !isIgnoreOwner() )
+        if ( !isIgnoreOwnership() )
         {
-            ArchiveEntryUtils.chown( outFile, entry.getOwner() );
+            ArchiveEntryUtils.chown( outFile, entry.getOwnership() );
         }
 
         updateLastModifiedTimestamp( outFile, inLastModified );

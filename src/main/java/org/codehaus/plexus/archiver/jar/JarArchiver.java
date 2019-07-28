@@ -39,7 +39,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.parallel.InputStreamSupplier;
 import org.codehaus.plexus.archiver.ArchiverException;
-import org.codehaus.plexus.archiver.Owner;
+import org.codehaus.plexus.archiver.Ownership;
 import org.codehaus.plexus.archiver.zip.ConcurrentJarCreator;
 import org.codehaus.plexus.archiver.zip.ZipArchiver;
 import org.codehaus.plexus.logging.Logger;
@@ -501,7 +501,7 @@ public class JarArchiver
     @Override
     protected void zipFile( InputStreamSupplier is, ConcurrentJarCreator zOut, String vPath,
                             long lastModified, File fromArchive,
-                            int mode, Owner owner, String symlinkDestination, boolean addInParallel )
+                            int mode, Ownership ownership, String symlinkDestination, boolean addInParallel )
         throws IOException, ArchiverException
     {
         if ( MANIFEST_NAME.equalsIgnoreCase( vPath ) )
@@ -525,7 +525,8 @@ public class JarArchiver
             {
                 rootEntries.addElement( vPath );
             }
-            super.zipFile( is, zOut, vPath, lastModified, fromArchive, mode, owner, symlinkDestination, addInParallel );
+            super.zipFile( is, zOut, vPath, lastModified, fromArchive, mode, ownership, symlinkDestination,
+                addInParallel );
         }
     }
 

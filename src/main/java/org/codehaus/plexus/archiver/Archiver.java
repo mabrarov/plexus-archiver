@@ -134,7 +134,7 @@ public interface Archiver
     void addSymlink( String symlinkName, int permissions, String symlinkDestination )
         throws ArchiverException;
 
-    void addSymlink( String symlinkName, int permissions, Owner owner, String symlinkDestination )
+    void addSymlink( String symlinkName, int permissions, Ownership ownership, String symlinkDestination )
         throws ArchiverException;
 
     void addFile( @Nonnull File inputFile, @Nonnull String destFileName )
@@ -143,7 +143,7 @@ public interface Archiver
     void addFile( @Nonnull File inputFile, @Nonnull String destFileName, int permissions )
         throws ArchiverException;
 
-    void addFile( @Nonnull File inputFile, @Nonnull String destFileName, int permissions, Owner owner)
+    void addFile( @Nonnull File inputFile, @Nonnull String destFileName, int permissions, Ownership ownership )
     throws ArchiverException;
 
     /**
@@ -230,7 +230,7 @@ public interface Archiver
     /**
      * TODO: provide description
      */
-    void addResource( PlexusIoResource resource, String destFileName, int permissions, Owner owner )
+    void addResource( PlexusIoResource resource, String destFileName, int permissions, Ownership ownership )
         throws ArchiverException;
 
     /**
@@ -253,19 +253,19 @@ public interface Archiver
 
     int getOverrideFileMode();
 
-    void setFileOwner( Owner owner );
+    void setFileOwnership( Ownership ownership );
 
-    Owner getFileOwner();
+    Ownership getFileOwnership();
 
-    Owner getOverrideFileOwner();
+    Ownership getOverrideFileOwnership();
 
     void setDefaultFileMode( int mode );
 
     int getDefaultFileMode();
 
-    void setDefaultFileOwner( Owner owner );
+    void setDefaultFileOwnership( Ownership ownership );
 
-    Owner getDefaultFileOwner();
+    Ownership getDefaultFileOwnership();
 
     /**
      * This is the forced mode that should be used regardless if set, otherwise falls back to default.
@@ -286,13 +286,13 @@ public interface Archiver
     /**
      * This is the forced mode that should be used regardless if set, otherwise falls back to default.
      *
-     * @param owner
+     * @param ownership
      */
-    void setDirectoryOwner( Owner owner );
+    void setDirectoryOwnership( Ownership ownership );
 
-    Owner getDirectoryOwner();
+    Ownership getDirectoryOwnership();
 
-    Owner getOverrideDirectoryOwner();
+    Ownership getOverrideDirectoryOwnership();
 
     /**
      * This is the "default" value we should use if no other value is specified
@@ -306,11 +306,11 @@ public interface Archiver
     /**
      * This is the "default" value we should use if no other value is specified
      *
-     * @param owner
+     * @param ownership
      */
-    void setDefaultDirectoryOwner( Owner owner );
+    void setDefaultDirectoryOwnership( Ownership ownership );
 
-    Owner getDefaultDirectoryOwner();
+    Ownership getDefaultDirectoryOwnership();
 
     boolean getIncludeEmptyDirs();
 
@@ -439,11 +439,11 @@ public interface Archiver
     /**
      * @since 4.1.1
      */
-    boolean isIgnoreOwner();
+    boolean isIgnoreOwnership();
 
     /**
      * @since 4.1.1
      */
-    void setIgnoreOwner( final boolean ignoreOwner );
+    void setIgnoreOwnership( final boolean ignoreOwnership );
 
 }

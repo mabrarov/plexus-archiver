@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.Nonnull;
 import org.codehaus.plexus.archiver.resources.PlexusIoVirtualSymlinkResource;
-import org.codehaus.plexus.archiver.util.OwnerUtils;
+import org.codehaus.plexus.archiver.util.OwnershipUtils;
 import org.codehaus.plexus.components.io.attributes.PlexusIoResourceAttributes;
 import org.codehaus.plexus.components.io.functions.ResourceAttributeSupplier;
 import org.codehaus.plexus.components.io.resources.PlexusIoFileResource;
@@ -52,9 +52,9 @@ public class ArchiveEntry
     private final int defaultDirMode;  // Sometimes a directory needs to be created. Which mode should it be ?
     // this mode is at the time of the creation of the archive entry, which is an important distinction
 
-    private final Owner defaultDirOwner;
+    private final Ownership defaultDirOwnership;
 
-    private final Owner owner;
+    private final Ownership ownership;
 
     private PlexusIoResourceAttributes attributes;
 
@@ -66,19 +66,19 @@ public class ArchiveEntry
      * @param resource original filename
      * @param type FILE or DIRECTORY
      * @param mode octal unix style permissions
-     * @param owner TODO: describe parameter and possibility to use {@code null}
+     * @param ownership TODO: describe parameter and possibility to use {@code null}
      * @param collection
      * @param defaultDirMode
      */
-    private ArchiveEntry( String name, @Nonnull PlexusIoResource resource, int type, int mode, Owner owner,
-                          PlexusIoResourceCollection collection, int defaultDirMode, Owner defaultDirOwner )
+    private ArchiveEntry( String name, @Nonnull PlexusIoResource resource, int type, int mode, Ownership ownership,
+                          PlexusIoResourceCollection collection, int defaultDirMode, Ownership defaultDirOwnership )
     {
         try
         {
             this.name = name;
             this.defaultDirMode = defaultDirMode;
-            this.defaultDirOwner = defaultDirOwner;
-            this.owner = owner;
+            this.defaultDirOwnership = defaultDirOwnership;
+            this.ownership = ownership;
             this.resource = collection != null ? collection.resolve( resource ) : resource;
             this.attributes = ( resource instanceof ResourceAttributeSupplier )
                                   ? ( (ResourceAttributeSupplier) resource ).getAttributes() : null;
@@ -181,15 +181,15 @@ public class ArchiveEntry
 
     }
 
-    public Owner getOwner()
+    public Ownership getOwnership()
     {
-        if ( owner != null )
+        if ( ownership != null )
         {
-            return owner;
+            return ownership;
         }
         if ( attributes != null )
         {
-            return OwnerUtils.buildOwner( attributes );
+            return OwnershipUtils.buildOwner( attributes );
         }
         return null;
     }
@@ -205,9 +205,9 @@ public class ArchiveEntry
         return addSynchronously;
     }
 
-    public static ArchiveEntry createFileEntry( String target, PlexusIoResource resource, int permissions, Owner owner,
-                                                PlexusIoResourceCollection collection, int defaultDirectoryPermissions,
-                                                Owner defaultDirectoryOwner)
+    public static ArchiveEntry createFileEntry( String target, PlexusIoResource resource, int permissions,
+                                                Ownership ownership, PlexusIoResourceCollection collection,
+                                                int defaultDirectoryPermissions, Ownership defaultDirectoryOwnership )
         throws ArchiverException
     {
         if ( resource.isDirectory() )
@@ -215,12 +215,12 @@ public class ArchiveEntry
             throw new ArchiverException( "Not a file: " + resource.getName() );
         }
         final int type = resource.isSymbolicLink() ? SYMLINK : FILE;
-        return new ArchiveEntry( target, resource, type, permissions, owner, collection, defaultDirectoryPermissions,
-                defaultDirectoryOwner );
+        return new ArchiveEntry( target, resource, type, permissions, ownership, collection,
+            defaultDirectoryPermissions, defaultDirectoryOwnership );
     }
 
-    public static ArchiveEntry createFileEntry( String target, File file, int permissions, Owner owner,
-                                                int defaultDirectoryPermissions, Owner defaultDirectoryOwner )
+    public static ArchiveEntry createFileEntry( String target, File file, int permissions, Ownership ownership,
+                                                int defaultDirectoryPermissions, Ownership defaultDirectoryOwnership )
         throws ArchiverException, IOException
     {
         if ( !file.isFile() )
@@ -241,13 +241,13 @@ public class ArchiveEntry
             type = FILE; // File flag was there already. This is a bit of a mess !
         }
 
-        return new ArchiveEntry( target, res, type, permissions, owner, null, defaultDirectoryPermissions,
-                defaultDirectoryOwner );
+        return new ArchiveEntry( target, res, type, permissions, ownership, null, defaultDirectoryPermissions,
+            defaultDirectoryOwnership );
     }
 
     public static ArchiveEntry createDirectoryEntry( String target, @Nonnull PlexusIoResource resource, int permissions,
-                                                     Owner owner, int defaultDirectoryPermissions,
-                                                     Owner defaultDirectoryOwner)
+                                                     Ownership ownership, int defaultDirectoryPermissions,
+                                                     Ownership defaultDirectoryOwnership )
         throws ArchiverException
     {
         if ( !resource.isDirectory() )
@@ -265,12 +265,13 @@ public class ArchiveEntry
             type = DIRECTORY; // Dir flag was there already. This is a bit of a mess !
 
         }
-        return new ArchiveEntry( target, resource, type, permissions, owner, null, defaultDirectoryPermissions,
-                defaultDirectoryOwner );
+        return new ArchiveEntry( target, resource, type, permissions, ownership, null, defaultDirectoryPermissions,
+            defaultDirectoryOwnership );
     }
 
-    public static ArchiveEntry createDirectoryEntry( String target, final File file, int permissions, Owner owner,
-                                                     int defaultDirMode1, Owner defaultDirectoryOwner )
+    public static ArchiveEntry createDirectoryEntry( String target, final File file, int permissions,
+                                                     Ownership ownership, int defaultDirMode1,
+                                                     Ownership defaultDirectoryOwnership )
         throws ArchiverException, IOException
     {
         if ( !file.isDirectory() )
@@ -279,17 +280,17 @@ public class ArchiveEntry
         }
 
         final PlexusIoResource res = createResource( file );
-        return new ArchiveEntry( target, res, DIRECTORY, permissions, owner, null, defaultDirMode1,
-                defaultDirectoryOwner );
+        return new ArchiveEntry( target, res, DIRECTORY, permissions, ownership, null, defaultDirMode1,
+            defaultDirectoryOwnership );
     }
 
-    public static ArchiveEntry createSymlinkEntry( String symlinkName, int permissions, Owner owner,
+    public static ArchiveEntry createSymlinkEntry( String symlinkName, int permissions, Ownership ownership,
                                                    String symlinkDestination, int defaultDirectoryPermissions,
-                                                   Owner defaultDirectoryOwner)
+                                                   Ownership defaultDirectoryOwnership )
     {
         final ArchiveEntry archiveEntry = new ArchiveEntry(
             symlinkName, new PlexusIoVirtualSymlinkResource( new File( symlinkName ), symlinkDestination ), SYMLINK,
-            permissions, owner, null, defaultDirectoryPermissions, defaultDirectoryOwner );
+            permissions, ownership, null, defaultDirectoryPermissions, defaultDirectoryOwnership );
 
         return archiveEntry;
     }
@@ -315,9 +316,9 @@ public class ArchiveEntry
         return defaultDirMode;
     }
 
-    public Owner getDefaultDirOwner()
+    public Ownership getDefaultDirOwnership()
     {
-        return defaultDirOwner;
+        return defaultDirOwnership;
     }
 
 }

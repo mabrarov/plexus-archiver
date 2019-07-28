@@ -26,7 +26,7 @@ import java.nio.file.attribute.UserPrincipal;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.attribute.UserPrincipalNotFoundException;
 import org.codehaus.plexus.archiver.ArchiverException;
-import org.codehaus.plexus.archiver.Owner;
+import org.codehaus.plexus.archiver.Ownership;
 import org.codehaus.plexus.components.io.attributes.AttributeUtils;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.Os;
@@ -87,14 +87,14 @@ public final class ArchiveEntryUtils
         }
     }
 
-    public static void chown( final File file, final Owner owner ) throws ArchiverException
+    public static void chown( final File file, final Ownership ownership ) throws ArchiverException
     {
-        if ( owner == null )
+        if ( ownership == null )
         {
             return;
         }
-        final String userName = owner.getUserName();
-        final String groupName = owner.getGroupName();
+        final String userName = ownership.getUserName();
+        final String groupName = ownership.getGroupName();
         if ( userName == null && groupName == null )
         {
             return;
@@ -170,7 +170,7 @@ public final class ArchiveEntryUtils
         }
         catch ( IOException e )
         {
-            throw new ArchiverException( "Failed setting file owner", e );
+            throw new ArchiverException( "Failed setting file ownership", e );
         }
     }
 

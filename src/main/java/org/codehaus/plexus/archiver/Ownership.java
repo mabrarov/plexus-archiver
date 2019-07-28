@@ -18,7 +18,7 @@
  */
 package org.codehaus.plexus.archiver;
 
-public class Owner
+public class Ownership
 {
 
   private String userName;

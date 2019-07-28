@@ -31,7 +31,7 @@ import org.codehaus.plexus.archiver.ArchivedFileSet;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.FileSet;
-import org.codehaus.plexus.archiver.Owner;
+import org.codehaus.plexus.archiver.Ownership;
 import org.codehaus.plexus.archiver.ResourceIterator;
 import org.codehaus.plexus.components.io.attributes.PlexusIoResourceAttributes;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
@@ -53,7 +53,7 @@ public class TrackingArchiver
 
     private boolean ignorePermissions;
 
-    private boolean ignoreOwner;
+    private boolean ignoreOwnership;
 
     @Override
     public void createArchive()
@@ -115,10 +115,10 @@ public class TrackingArchiver
 
     @Override
     public void addFile( final @Nonnull File inputFile, final @Nonnull String destFileName, final int permissions,
-                         final Owner owner )
+                         final Ownership ownership )
         throws ArchiverException
     {
-        added.add( new Addition( inputFile, destFileName, null, null, permissions, owner ) );
+        added.add( new Addition( inputFile, destFileName, null, null, permissions, ownership ) );
     }
 
     @Override
@@ -151,10 +151,10 @@ public class TrackingArchiver
     }
 
     @Override
-    public void addSymlink( String s, int i, Owner owner, String s2 )
+    public void addSymlink( String s, int i, Ownership ownership, String s2 )
         throws ArchiverException
     {
-        added.add( new Addition( s, null, null, null, PlexusIoResourceAttributes.UNKNOWN_OCTAL_MODE, owner ) );
+        added.add( new Addition( s, null, null, null, PlexusIoResourceAttributes.UNKNOWN_OCTAL_MODE, ownership ) );
     }
 
     @Override
@@ -199,10 +199,10 @@ public class TrackingArchiver
 
     @Override
     public void addResource( final PlexusIoResource resource, final String destFileName, final int permissions,
-                             final Owner owner )
+                             final Ownership ownership )
         throws ArchiverException
     {
-        added.add( new Addition( resource, destFileName, null, null, permissions, owner ) );
+        added.add( new Addition( resource, destFileName, null, null, permissions, ownership ) );
     }
 
     @Override
@@ -242,19 +242,19 @@ public class TrackingArchiver
     }
 
     @Override
-    public void setFileOwner( Owner owner )
+    public void setFileOwnership( Ownership ownership )
     {
 
     }
 
     @Override
-    public Owner getFileOwner()
+    public Ownership getFileOwnership()
     {
         return null;
     }
 
     @Override
-    public Owner getOverrideFileOwner()
+    public Ownership getOverrideFileOwnership()
     {
         return null;
     }
@@ -271,13 +271,13 @@ public class TrackingArchiver
     }
 
     @Override
-    public void setDefaultFileOwner( Owner owner )
+    public void setDefaultFileOwnership( Ownership ownership )
     {
 
     }
 
     @Override
-    public Owner getDefaultFileOwner()
+    public Ownership getDefaultFileOwnership()
     {
         return null;
     }
@@ -300,19 +300,19 @@ public class TrackingArchiver
     }
 
     @Override
-    public void setDirectoryOwner( Owner owner )
+    public void setDirectoryOwnership( Ownership ownership )
     {
 
     }
 
     @Override
-    public Owner getDirectoryOwner()
+    public Ownership getDirectoryOwnership()
     {
         return null;
     }
 
     @Override
-    public Owner getOverrideDirectoryOwner()
+    public Ownership getOverrideDirectoryOwnership()
     {
         return null;
     }
@@ -329,13 +329,13 @@ public class TrackingArchiver
     }
 
     @Override
-    public void setDefaultDirectoryOwner( Owner owner )
+    public void setDefaultDirectoryOwnership( Ownership ownership )
     {
 
     }
 
     @Override
-    public Owner getDefaultDirectoryOwner()
+    public Ownership getDefaultDirectoryOwnership()
     {
         return null;
     }
@@ -426,7 +426,7 @@ public class TrackingArchiver
 
         public final int permissions;
 
-        public final Owner owner;
+        public final Ownership ownership;
 
         public final String[] includes;
 
@@ -439,10 +439,10 @@ public class TrackingArchiver
         }
 
         public Addition( final Object resource, final String destination, final String[] includes,
-                         final String[] excludes, final int permissions, final Owner owner )
+                         final String[] excludes, final int permissions, final Ownership ownership )
         {
             this.resource = resource;
-            this.owner = owner;
+            this.ownership = ownership;
             if ( resource instanceof FileSet )
             {
                 final FileSet fs = (FileSet) resource;
@@ -497,15 +497,15 @@ public class TrackingArchiver
     }
 
     @Override
-    public boolean isIgnoreOwner()
+    public boolean isIgnoreOwnership()
     {
-        return ignoreOwner;
+        return ignoreOwnership;
     }
 
     @Override
-    public void setIgnoreOwner( final boolean ignoreOwner )
+    public void setIgnoreOwnership( final boolean ignoreOwnership )
     {
-        this.ignoreOwner = ignoreOwner;
+        this.ignoreOwnership = ignoreOwnership;
     }
 
 }

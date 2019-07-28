@@ -40,7 +40,7 @@ import org.codehaus.plexus.archiver.AbstractArchiver;
 import org.codehaus.plexus.archiver.ArchiveEntry;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
-import org.codehaus.plexus.archiver.Owner;
+import org.codehaus.plexus.archiver.Ownership;
 import org.codehaus.plexus.archiver.ResourceIterator;
 import org.codehaus.plexus.archiver.UnixStat;
 import org.codehaus.plexus.archiver.exceptions.EmptyArchiveException;
@@ -389,7 +389,7 @@ public abstract class AbstractZipArchiver
             }
             else
             {
-                zipDir( entry.getResource(), zOut, name, entry.getMode(), entry.getOwner(), encoding );
+                zipDir( entry.getResource(), zOut, name, entry.getMode(), entry.getOwnership(), encoding );
             }
         }
     }
@@ -427,7 +427,8 @@ public abstract class AbstractZipArchiver
                 // the
                 // At this point we could do something like read the atr
                 final PlexusIoResource res = new AnonymousResource( f );
-                zipDir( res, zOut, dir, archiveEntry.getDefaultDirMode(), archiveEntry.getDefaultDirOwner(), encoding );
+                zipDir( res, zOut, dir, archiveEntry.getDefaultDirMode(), archiveEntry.getDefaultDirOwnership(),
+                    encoding );
             }
         }
     }
@@ -450,8 +451,8 @@ public abstract class AbstractZipArchiver
         "JavaDoc"
     } )
     protected void zipFile( InputStreamSupplier in, ConcurrentJarCreator zOut, String vPath,
-                            long lastModified,
-                            File fromArchive, int mode, Owner owner, String symlinkDestination, boolean addInParallel )
+                            long lastModified, File fromArchive, int mode, Ownership ownership,
+                            String symlinkDestination, boolean addInParallel )
         throws IOException, ArchiverException
     {
         getLogger().debug( "adding entry " + vPath );
@@ -465,7 +466,7 @@ public abstract class AbstractZipArchiver
 
             ze.setMethod( doCompress ? ZipArchiveEntry.DEFLATED : ZipArchiveEntry.STORED );
             ze.setUnixMode( UnixStat.FILE_FLAG | mode );
-            setEntryOwner( ze, owner );
+            setEntryOwner( ze, ownership );
 
             InputStream payload;
             if ( ze.isUnixSymlink() )
@@ -524,7 +525,7 @@ public abstract class AbstractZipArchiver
         };
         try
         {
-            zipFile( in, zOut, vPath, resource.getLastModified(), null, entry.getMode(), entry.getOwner(),
+            zipFile( in, zOut, vPath, resource.getLastModified(), null, entry.getMode(), entry.getOwnership(),
                     symlinkTarget, !entry.shouldAddSynchronously() );
         }
         catch ( IOException e )
@@ -559,7 +560,7 @@ public abstract class AbstractZipArchiver
          */
     }
 
-    protected void zipDir( PlexusIoResource dir, ConcurrentJarCreator zOut, String vPath, int mode, Owner owner,
+    protected void zipDir( PlexusIoResource dir, ConcurrentJarCreator zOut, String vPath, int mode, Ownership ownership,
                            String encodingToUse )
         throws IOException
     {
@@ -610,7 +611,7 @@ public abstract class AbstractZipArchiver
                 ze.setCrc( EMPTY_CRC );
             }
             ze.setUnixMode( mode );
-            setEntryOwner( ze, owner );
+            setEntryOwner( ze, ownership );
 
             if ( !isSymlink )
             {
@@ -841,14 +842,14 @@ public abstract class AbstractZipArchiver
         return archiveType;
     }
 
-    private void setEntryOwner( ZipArchiveEntry entry, Owner owner )
+    private void setEntryOwner( ZipArchiveEntry entry, Ownership ownership )
     {
-        if ( owner == null )
+        if ( ownership == null )
         {
             return;
         }
-        final Integer userId = owner.getUserId();
-        final Integer groupId = owner.getGroupId();
+        final Integer userId = ownership.getUserId();
+        final Integer groupId = ownership.getGroupId();
         if (userId == null && groupId == null)
         {
             return;
