@@ -413,4 +413,16 @@ public class DelgatingArchiver implements Archiver
         target.setIgnorePermissions( ignorePermissions );
     }
 
+    @Override
+    public boolean isIgnoreOwner()
+    {
+        return target.isIgnoreOwner();
+    }
+
+    @Override
+    public void setIgnoreOwner( boolean ignoreOwner )
+    {
+        target.setIgnoreOwner( ignoreOwner );
+    }
+
 }

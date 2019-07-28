@@ -42,6 +42,8 @@ public class NoOpArchiver implements Archiver
 
     private boolean ignorePermissions;
 
+    private boolean ignoreOwner;
+
     @Override
     public void createArchive()
         throws ArchiverException, IOException
@@ -426,6 +428,18 @@ public class NoOpArchiver implements Archiver
     public void setIgnorePermissions( boolean ignorePermissions )
     {
         this.ignorePermissions = ignorePermissions;
+    }
+
+    @Override
+    public boolean isIgnoreOwner()
+    {
+        return ignoreOwner;
+    }
+
+    @Override
+    public void setIgnoreOwner( boolean ignoreOwner )
+    {
+        this.ignoreOwner = ignoreOwner;
     }
 
 }
