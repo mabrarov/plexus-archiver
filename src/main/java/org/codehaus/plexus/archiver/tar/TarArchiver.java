@@ -29,12 +29,11 @@ import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream;
 import org.codehaus.plexus.archiver.AbstractArchiver;
 import org.codehaus.plexus.archiver.ArchiveEntry;
 import org.codehaus.plexus.archiver.ArchiverException;
-import org.codehaus.plexus.archiver.Owner;
+import org.codehaus.plexus.archiver.Ownership;
 import org.codehaus.plexus.archiver.ResourceIterator;
 import org.codehaus.plexus.archiver.exceptions.EmptyArchiveException;
 import org.codehaus.plexus.archiver.util.ResourceUtils;
 import org.codehaus.plexus.archiver.util.Streams;
-import org.codehaus.plexus.components.io.attributes.PlexusIoResourceAttributes;
 import org.codehaus.plexus.components.io.functions.SymlinkDestinationSupplier;
 import org.codehaus.plexus.components.io.resources.PlexusIoResource;
 import org.codehaus.plexus.util.IOUtil;
@@ -299,24 +298,24 @@ public class TarArchiver
             }
             te.setMode( entry.getMode() );
 
-            final Owner owner = entry.getOwner();
+            final Ownership ownership = entry.getOwnership();
 
-            te.setUserName( ( owner != null && owner.getUserName() != null )
-                                ? owner.getUserName()
+            te.setUserName( ( ownership != null && ownership.getUserName() != null )
+                                ? ownership.getUserName()
                                 : options.getUserName() );
-            te.setGroupName( ( owner != null && owner.getGroupName() != null )
-                                 ? owner.getGroupName()
+            te.setGroupName( ( ownership != null && ownership.getGroupName() != null )
+                                 ? ownership.getGroupName()
                                  : options.getGroup() );
 
             final int userId =
-                ( owner != null && owner.getUserId() != null ) ? owner.getUserId() : options.getUid();
+                ( ownership != null && ownership.getUserId() != null ) ? ownership.getUserId() : options.getUid();
             if ( userId >= 0 )
             {
                 te.setUserId( userId );
             }
 
             final int groupId =
-                ( owner != null && owner.getGroupId() != null ) ? owner.getGroupId() : options.getGid();
+                ( ownership != null && ownership.getGroupId() != null ) ? ownership.getGroupId() : options.getGid();
             if ( groupId >= 0 )
             {
                 te.setGroupId( groupId );

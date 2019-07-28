@@ -18,26 +18,26 @@
  */
 package org.codehaus.plexus.archiver.util;
 
-import org.codehaus.plexus.archiver.Owner;
+import org.codehaus.plexus.archiver.Ownership;
 import org.codehaus.plexus.components.io.attributes.PlexusIoResourceAttributes;
 
 @SuppressWarnings( "JavaDoc" )
-public final class OwnerUtils
+public final class OwnershipUtils
 {
 
-    private OwnerUtils()
+    private OwnershipUtils()
     {
         // no op
     }
 
-    public static Owner buildOwner( final PlexusIoResourceAttributes attributes )
+    public static Ownership buildOwner( final PlexusIoResourceAttributes attributes )
     {
-        final Owner owner = new Owner();
-        owner.setUserName( attributes.getUserName() );
-        owner.setUserId( attributes.getUserId() );
-        owner.setGroupName( attributes.getGroupName() );
-        owner.setGroupId( attributes.getGroupId() );
-        return owner;
+        final Ownership ownership = new Ownership();
+        ownership.setUserName( attributes.getUserName() );
+        ownership.setUserId( attributes.getUserId() );
+        ownership.setGroupName( attributes.getGroupName() );
+        ownership.setGroupId( attributes.getGroupId() );
+        return ownership;
     }
 
 }
